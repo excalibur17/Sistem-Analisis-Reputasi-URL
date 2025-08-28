@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <title>SARU - Cek Keamanan URL</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      /* Style untuk menyembunyikan loader secara default */
+      #loading-indicator {
+        display: none;
+      }
+      /* Opsi: Tambahkan animasi putar sederhana ke gambar loading */
+      .loader-image {
+        animation: spin 1.5s linear infinite;
+      }
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-dark bg-dark">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="/">
+          <img
+            src="{{ url_for('static', filename='logo-dkips.png') }}"
+            alt="Logo SARU"
+            height="40"
+          />
+        </a>
+        <div class="d-flex">
+          <a href="{{ url_for('logout') }}" class="btn btn-outline-light">Logout</a>
+        </div>
+      </div>
+    </nav>
+    <div class="container mt-5">
+      <div id="main-content">
+        <h1 class="text-center">🔍 SARU - Sistem Analisis Reputasi URL</h1>
+        <p class="text-center text-muted">
+          Masukkan URL untuk diperiksa keamanannya dengan berbagai tools OSINT.
+        </p>
+
+        <form id="check-form" action="/check" method="POST" class="mt-4">
+          <div class="input-group mb-3">
+            <input
+              type="text"
+              name="url"
+              id="url-input"
+              class="form-control"
+              placeholder="Contoh: https://www.contoh.com"
+              required
+            />
+            <button class="btn btn-primary" type="submit">
+              Periksa Sekarang
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Indikator Loading (Awalnya tersembunyi) -->
+      <div id="loading-indicator" class="text-center mt-5">
+        <img 
+            src="{{ url_for('static', filename='icons8-loading-32.png') }}" 
+            alt="Loading..." 
+            width="80"
+            class="loader-image" 
+        />
+        <h4 class="mt-3">Menganalisis URL...</h4>
+        <p class="text-muted">Proses ini mungkin memakan waktu beberapa detik.</p>
+      </div>
+
+      <div class="mt-5">
+        <h3 class="text-center mb-4">Riwayat Pencarian Terakhir</h3>
+        {% if history %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>URL</th>
+                        <th>Status</th>
+                        <th>Registrar</th>
+                        <th>Waktu Pengecekan</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in history %}
+                    <tr>
+                        <td>
+                            <code>
+                                <a href="{{ item.url if item.url.startswith('http') else '//' + item.url }}" target="_blank" rel="noopener noreferrer">
+                                    {{ item.url }}
+                                </a>
+                            </code>
+                        </td>
+                        <td>
+                            {% if item.status == 'Berbahaya' %}
+                                <span class="badge bg-danger">{{ item.status }}</span>
+                            {% elif item.status == 'Mencurigakan' %}
+                                <span class="badge bg-warning text-dark">{{ item.status }}</span>
+                            {% else %}
+                                <span class="badge bg-success">{{ item.status }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ item.registrar }}</td>
+                        <td>{{ item.timestamp_human }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-center text-muted">Belum ada riwayat pencarian.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <script>
+      const checkForm = document.getElementById('check-form');
+      const mainContent = document.getElementById('main-content');
+      const loadingIndicator = document.getElementById('loading-indicator');
+      const urlInput = document.getElementById('url-input');
+
+      checkForm.addEventListener('submit', function(event) {
+        if (urlInput.value.trim() !== '') {
+          mainContent.style.display = 'none';
+          loadingIndicator.style.display = 'block';
+        }
+      });
+
+      // PERBAIKAN DI SINI:
+      // Tambahkan event listener untuk 'pageshow'
+      window.addEventListener('pageshow', function(event) {
+        // 'persisted' akan true jika halaman dimuat dari cache (saat menekan tombol back)
+        if (event.persisted) {
+          // Reset tampilan UI ke kondisi awal
+          mainContent.style.display = 'block';
+          loadingIndicator.style.display = 'none';
+        }
+      });
+    </script>
+</body>
+</html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Login - SARU Project</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='login.css') }}"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <!-- Tambahan heading utama -->
+       <a class="navbar-brand" href="/">
+          <img
+            src="{{ url_for('static', filename='logo-sulut.c2069edddb6c1aa120a3.png') }}"
+            alt="Logo Sulut"
+            height="60"
+          />
+        </a>
+      <h1>Sistem Analisis Reputasi URL</h1>
+      
+
+      <!-- Flash message handling -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <!-- Login Form -->
+      <form method="POST">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" required />
+
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required />
+
+        <button type="submit">Login</button>
+      </form>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hasil Analisis - {{ url }}</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      .card-header {
+        background-color: #f8f9fa;
+      }
+      .table-responsive {
+        max-height: 400px;
+      }
+      
+      
+      .bg-malicious {
+        background-color: #dc3545 !important;
+        color: white;
+      }
+      .bg-suspicious {
+        background-color: #ffc107 !important;
+        color: black;
+      }
+      .bg-harmless {
+        background-color: #198754 !important;
+        color: white;
+      }
+      .bg-undetected {
+        background-color: #6c757d !important;
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container mt-5 mb-5">
+      <h1 class="mb-4">
+        Hasil Analisis untuk:<br /><code class="fs-5">{{ url }}</code>
+      </h1>
+
+      {% if vt_results and not vt_results.error %}
+      <div class="row">
+        <!-- Kolom Kiri: Metadata & Ringkasan -->
+        <div class="col-lg-4 mb-4">
+          <!-- Card: Ringkasan Status -->
+          <div class="card mb-4">
+            <div class="card-header fw-bold">Ringkasan Pemindaian</div>
+            <ul class="list-group list-group-flush">
+              {% set stats = vt_results.last_analysis_stats %}
+              <li
+                class="list-group-item d-flex justify-content-between align-items-center"
+              >
+                Berbahaya (Malicious)<span class="badge bg-danger rounded-pill"
+                  >{{ stats.malicious }}</span
+                >
+              </li>
+              <li
+                class="list-group-item d-flex justify-content-between align-items-center"
+              >
+                Mencurigakan (Suspicious)<span
+                  class="badge bg-warning text-dark rounded-pill"
+                  >{{ stats.suspicious }}</span
+                >
+              </li>
+              <li
+                class="list-group-item d-flex justify-content-between align-items-center"
+              >
+                Aman (Harmless)<span class="badge bg-success rounded-pill"
+                  >{{ stats.harmless }}</span
+                >
+              </li>
+              <li
+                class="list-group-item d-flex justify-content-between align-items-center"
+              >
+                Tidak Terdeteksi (Undetected)<span
+                  class="badge bg-secondary rounded-pill"
+                  >{{ stats.undetected }}</span
+                >
+              </li>
+              <li
+                class="list-group-item d-flex justify-content-between align-items-center"
+              >
+                Waktu Habis (Timeout)<span
+                  class="badge bg-info text-dark rounded-pill"
+                  >{{ stats.timeout }}</span
+                >
+              </li>
+            </ul>
+          </div>
+
+          <!-- Card: Metadata -->
+          <div class="card">
+            <div class="card-header fw-bold">Metadata & Info Tambahan</div>
+            <div class="card-body">
+              <p>
+                <strong>Judul Situs:</strong><br />{{ vt_results.title or 'Tidak
+                tersedia' }}
+              </p>
+              <p>
+                <strong>Reputasi Komunitas:</strong><br />{{
+                vt_results.reputation }}
+              </p>
+              <p>
+                <strong>Tanggal Analisis Terakhir:</strong><br />{{
+                vt_results.last_analysis_date_human or 'Tidak tersedia' }}
+              </p>
+              <p>
+                <strong>Kode Respon HTTP:</strong><br />{{
+                vt_results.last_http_response_code or 'Tidak tersedia' }}
+              </p>
+              <p>
+                <strong>URL Final:</strong><br /><code class="fs-6"
+                  >{{ vt_results.last_final_url or 'Tidak tersedia' }}</code
+                >
+              </p>
+              <p>
+                <strong>Total Votes:</strong>
+                <span class="badge bg-success me-2"
+                  >Aman: {{ vt_results.total_votes.harmless }}</span
+                >
+                <span class="badge bg-danger"
+                  >Berbahaya: {{ vt_results.total_votes.malicious }}</span
+                >
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Kolom Kanan: Detail & WHOIS -->
+        <div class="col-lg-8">
+          <!-- Card: Detail Hasil Pemindaian per Mesin -->
+          <div class="card mb-4">
+            <div class="card-header fw-bold">
+              Detail Hasil per Mesin Keamanan
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                  <thead>
+                    <tr>
+                      <th>Nama Mesin</th>
+                      <th>Kategori</th>
+                      <th>Hasil</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for engine, result in
+                    vt_results.last_analysis_results.items() %}
+                    <tr>
+                      <td>{{ result.engine_name }}</td>
+                      <td>
+                        <span
+                          class="badge rounded-pill {% if result.category == 'malicious' %}bg-malicious {% elif result.category == 'suspicious' %}bg-suspicious {% elif result.category == 'harmless' %}bg-harmless {% else %}bg-undetected {% endif %}"
+                        >
+                          {{ result.category }}
+                        </span>
+                      </td>
+                      <td>{{ result.result or 'N/A' }}</td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card: Informasi WHOIS -->
+          <div class="card mb-4">
+            <div class="card-header fw-bold">Informasi WHOIS</div>
+            <div class="card-body">
+                {% if whois_results and not whois_results.error %}
+                    <p><strong>Nama Domain:</strong> {{ whois_results.domainName }}</p>
+                    <p><strong>Registrar:</strong> {{ whois_results.registrarName }}</p>
+                    <hr>
+                    <p><strong>Tanggal Dibuat:</strong> {{ whois_results.createdDate }}</p>
+                    <p><strong>Tanggal Diperbarui:</strong> {{ whois_results.updatedDate }}</p>
+                    <p><strong>Tanggal Kedaluwarsa:</strong> {{ whois_results.expiresDate }}</p>
+                    <hr>
+                    
+                    {% if whois_results.registrant %}
+                        <h5 class="mt-3">Info Kontak Registrant</h5>
+                        <p><strong>Nama:</strong> {{ whois_results.registrant.name or 'N/A' }}</p>
+                        <p><strong>Organisasi:</strong> {{ whois_results.registrant.organization or 'N/A' }}</p>
+                        <p><strong>Email:</strong> {{ whois_results.registrant.email or 'N/A' }}</p>
+                        <p><strong>Alamat:</strong> {{ whois_results.registrant.street or ''}}, {{ whois_results.registrant.city or ''}}, {{ whois_results.registrant.country or ''}}</p>
+                    {% else %}
+                        <div class="alert alert-info mt-3">Informasi kontak registrant tidak tersedia atau dilindungi oleh layanan privasi.</div>
+                    {% endif %}
+                    
+                {% elif whois_results.error %}
+                    <div class="alert alert-warning">{{ whois_results.error }}</div>
+                {% else %}
+                    <p class="text-secondary">Data WHOIS tidak tersedia.</p>
+                {% endif %}
+            </div>
+          </div>
+
+          <!-- Card Baru: Informasi Geolokasi -->
+          <div class="card mb-4">
+              <div class="card-header fw-bold">Informasi Geografis & Jaringan</div>
+              <div class="card-body">
+                  {% if geo_results and not geo_results.error %}
+                      <p><strong>Alamat IP:</strong> <code>{{ geo_results.ip }}</code></p>
+                      <p><strong>Lokasi:</strong> {{ geo_results.city or 'N/A' }}, {{ geo_results.region or 'N/A' }}, {{ geo_results.country or 'N/A' }}</p>
+                      <p><strong>Provider (ISP):</strong> {{ geo_results.org or 'N/A' }}</p>
+                      <p><strong>Timezone:</strong> {{ geo_results.timezone or 'N/A' }}</p>
+                  {% elif geo_results.error %}
+                      <div class="alert alert-warning">{{ geo_results.error }}</div>
+                  {% else %}
+                      <p class="text-secondary">Data geolokasi tidak tersedia.</p>
+                  {% endif %}
+              </div>
+          </div>
+        </div>
+      </div>
+
+      {% else %}
+      <!-- Tampilan jika ada error -->
+      <div class="alert alert-danger">
+        <h4 class="alert-heading">Terjadi Kesalahan!</h4>
+        <p>
+          {{ vt_results.error or "Gagal memuat data dari VirusTotal. Silakan
+          coba lagi." }}
+        </p>
+      </div>
+      {% endif %}
+
+      <a href="/" class="btn btn-secondary mt-4">Kembali & Cek URL Lain</a>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>
