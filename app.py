@@ -101,6 +101,6 @@ def check():
     )
 
 
-if __name__ == '__main__':
+#if __name__ == '__main__':
     # PERUBAHAN DI SINI
-    app.run(debug=True, port=11005)
+   # app.run(debug=True, port=11005)
