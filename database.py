@@ -44,10 +44,12 @@ def save_search_history(url, vt_summary, whois_registrar):
         """, (url, status, whois_registrar, malicious_count, datetime.now()))
         conn.commit()
         conn.close()
-        print(f"✅ History saved for {url}")
+        # PERBAIKAN: Emoji dihapus
+        print(f"History saved for {url}")
         return True
     except Exception as e:
-        print(f"❌ Error saving history: {e}")
+        # PERBAIKAN: Emoji dihapus
+        print(f"Error saving history: {e}")
         return False
 
 # -------------------------------
@@ -80,7 +82,8 @@ def get_search_history(limit=10):
 
         return history_list
     except Exception as e:
-        print(f"❌ Error getting history: {e}")
+        # PERBAIKAN: Emoji dihapus
+        print(f"Error getting history: {e}")
         return []
 
 # Panggil init_db saat modul diimpor
